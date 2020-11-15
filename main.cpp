@@ -1,8 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <chrono>
-
+#include <string>
 
 #define SHOW_CONTENT true
 #undef SHOW_CONTENT
@@ -25,9 +24,9 @@ size_t get_file_size(const std::string& file_path) {
 
 
 int main() {
-    const std::string raw_file_path = R"(~/movies.txt)";
-    const std::string user_file_path = "~/user.csv";
-    const std::string reviews_file_path = "~/reviews.csv";
+    const std::string raw_file_path = R"(./movies.txt)";
+    const std::string user_file_path = "./user.csv";
+    const std::string reviews_file_path = "./reviews.csv";
 
 
     std::ifstream raw_file(raw_file_path, std::ios::binary);
@@ -39,10 +38,10 @@ int main() {
     
     std::ofstream log ("log.txt");
 
-    const std::string k_label_project("product/productId: ");
+    const std::string k_label_product("product/productId: ");
     const std::string k_label_user("review/userId: ");
     const std::string k_label_name("review/profileName: ");
-    const auto k_project_start = k_label_project.length();
+    const auto k_product_start = k_label_product.length();
     const auto k_user_start = k_label_user.length();
     const auto k_name_start = k_label_name.length();
 
@@ -54,18 +53,18 @@ int main() {
     size_t file_count = 0;
 
     std::string line;
-    
+
     while (raw_file) {
         std::getline(raw_file, line);
 #ifdef SHOW_CONTENT
         std::cout << line << std::endl;
 #endif
         if (is_id_line(line)) {
-            std::string product_id = line.substr(k_id_start);
-            std::getline(raw_file, file);
+            std::string product_id = line.substr(k_product_start);
+            std::getline(raw_file, line);
             std::string user_id = line.substr(k_user_start);
            
-            std::getline(raw_file, file)
+            std::getline(raw_file, line);
             std::string profile_name = line.substr(k_name_start); 
             user_file << user_id << ","  << profile_name << ",User\n"; 
             reviews_file << user_id << "," <<  product_id << ",REVIEWED\n";      
@@ -75,7 +74,6 @@ int main() {
             } while (!is_space_line(line));
         }
         line_count++;
-
     }
     user_file << std::flush;
     reviews_file << std::flush;

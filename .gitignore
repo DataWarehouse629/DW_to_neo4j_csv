@@ -1,4 +1,9 @@
 id*
 /cmake-build-debug
 /.idea
-/vscode
+
+*.csv
+*.txt
+*.exe
+
+/.vscode
