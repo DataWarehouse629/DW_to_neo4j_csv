@@ -26,8 +26,8 @@ size_t get_file_size(const std::string& file_path) {
 
 int main() {
     const std::string raw_file_path = R"(~/movies.txt)";
-    std::string user_file_path = "~/user.csv";
-    std::string reviews_file_path = "~revies.csv";
+    const std::string user_file_path = "~/user.csv";
+    const std::string reviews_file_path = "~/reviews.csv";
 
 
     std::ifstream raw_file(raw_file_path, std::ios::binary);
@@ -37,13 +37,11 @@ int main() {
     user_file << "userId:ID,profileName:string[],:LABEL" << std::endl;
     reviews_file << ":START_ID,:END_ID,:TYPE" << std::endl;
     
-    
-    
     std::ofstream log ("log.txt");
 
-    const std::string_view k_label_project("product/productId: ");
-    const std::stirng_view k_label_user("review/userId: ")
-    const std::string_view k_label_name("review/profileName: ");
+    const std::string k_label_project("product/productId: ");
+    const std::string k_label_user("review/userId: ");
+    const std::string k_label_name("review/profileName: ");
     const auto k_project_start = k_label_project.length();
     const auto k_user_start = k_label_user.length();
     const auto k_name_start = k_label_name.length();
@@ -55,11 +53,8 @@ int main() {
     size_t product_count = 0;
     size_t file_count = 0;
 
-
-    std::ofstream res_file(res_file_path);
     std::string line;
-    std::string last_id;
-
+    
     while (raw_file) {
         std::getline(raw_file, line);
 #ifdef SHOW_CONTENT
