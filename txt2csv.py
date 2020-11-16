@@ -1,7 +1,7 @@
 import csv
 
 with open('csvs/titles.csv', 'w', encoding='utf-8', newline='') as title_csv:
-    headers = ('productId:ID','title:string')
+    headers = ('productId:ID(Product-ID)','title:string')
     writer = csv.writer(title_csv, quoting =csv.QUOTE_ALL)
     writer.writerow(headers)
     with open('titles.txt', encoding='utf-8') as titles:
@@ -12,7 +12,7 @@ with open('csvs/titles.csv', 'w', encoding='utf-8', newline='') as title_csv:
             writer.writerow((productId,title))
 
 with open('csvs/not_found.csv', 'w', encoding='utf-8', newline='') as title_csv:
-    headers = ('productId:ID',)
+    headers = ('productId:ID(Product-ID)',)
 
     writer = csv.writer(title_csv, quoting =csv.QUOTE_ALL)
     writer.writerow(headers)
