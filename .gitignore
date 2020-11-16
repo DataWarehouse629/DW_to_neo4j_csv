@@ -5,5 +5,6 @@ id*
 *.csv
 *.txt
 *.exe
+/csvs/
 
 /.vscode

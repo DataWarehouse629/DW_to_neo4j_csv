@@ -2,6 +2,7 @@
 #include <fstream>
 #include <chrono>
 #include <string>
+#include <algorithm>
 
 #define SHOW_CONTENT true
 #undef SHOW_CONTENT
@@ -33,8 +34,8 @@ int main() {
     std::ofstream user_file(user_file_path);
     std::ofstream reviews_file(reviews_file_path);
 
-    user_file << "userId:ID,profileName:string[],:LABEL" << std::endl;
-    reviews_file << ":START_ID,:END_ID,:TYPE" << std::endl;
+    user_file << "userId:ID,profileName:string[]" << std::endl;
+    reviews_file << ":START_ID(userId),:END_ID(productId)" << std::endl;
     
     std::ofstream log ("log.txt");
 
@@ -51,6 +52,7 @@ int main() {
     size_t comment_count = 0;
     size_t product_count = 0;
     size_t file_count = 0;
+    size_t review_count = 0;
 
     std::string line;
 
@@ -65,9 +67,11 @@ int main() {
             std::string user_id = line.substr(k_user_start);
            
             std::getline(raw_file, line);
-            std::string profile_name = line.substr(k_name_start); 
-            user_file << user_id << ","  << profile_name << ",User\n"; 
-            reviews_file << user_id << "," <<  product_id << ",REVIEWED\n";      
+            std::string profile_name = line.substr(k_name_start);
+            std::replace(profile_name.begin(), profile_name.end(), '\n', ' '); 
+            user_file << user_id << ","  << profile_name << "\n"; 
+            reviews_file << user_id << "," <<  product_id << "\n";     
+            review_count++;
             do {
                 ++line_count;
                 std::getline(raw_file, line);
@@ -80,6 +84,7 @@ int main() {
     user_file.close();
     reviews_file.close();
     std::cout << line_count << std::endl;
+    std::cout << review_count << std::endl;
     //std::cout << block << std::endl;
     //std::cout << raw_file.tellg() << std::endl;
     return 0;
