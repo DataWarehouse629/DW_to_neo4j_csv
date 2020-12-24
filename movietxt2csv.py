@@ -1,11 +1,13 @@
 import csv
+import datetime
 import re
 from dataclasses import dataclass, field
 from typing import *
 import tqdm
-
+import time
+import random
 raw_file_path = "./movies.txt"
-user_file_path = "./csvs/users.csv"
+order_file_path = "./csvs/orders.csv"
 review_user_file_path = "./csvs/review_user.csv"
 '''
 
@@ -123,13 +125,12 @@ lineParsers: List[ColData] = [ProductId(), UserId(), ProfileName(), Helpfulness(
                               Blank()]
 
 with open(raw_file_path, 'r', encoding='ISO-8859-1') as movie_txt:
-    with open(user_file_path, 'w', encoding='utf-8', newline='') as user_file:
-        user_writer = csv.writer(user_file, quoting=csv.QUOTE_ALL)
+    with open(order_file_path, 'w', encoding='utf-8', newline='') as order_file:
+        order_writer = csv.writer(order_file, quoting=csv.QUOTE_ALL)
         index = 0
         tasks = tqdm.tqdm(total=7911684)
         state = 0
         row_data = []
-
         for line in movie_txt:
 
             if state == -7:
@@ -140,10 +141,27 @@ with open(raw_file_path, 'r', encoding='ISO-8859-1') as movie_txt:
                     res = lineParsers[state].after_handle(current_line)
                     row_data.append(res)
                     state = 0
-                    user_writer.writerow((row_data[1], row_data[2]))
-                    #review_user_writer.writerow((row_data[0], row_data[1]))
+
+                    product_id = row_data[0]
+                    user_id = row_data[1]
+                    user_username = row_data[2]
+                    user_gender = ord(user_id[-1]) % 2
+                    order_time_local = time.localtime(float(row_data[6]))
+                    order_time = time.strftime("%Y-%m-%d", order_time_local)
+                    order_id = index
+                    order_number_choice = random.randint(0, 9)
+                    if order_number_choice == 9:
+                        order_number = 3
+                    elif order_number_choice == 8 or order_number_choice == 7:
+                        order_number = 2
+                    else:
+                        order_number = 1
+                    order_writer.writerow((order_id, order_time, order_number,
+                                          user_id, user_username, user_gender,
+                                          product_id))
                     tasks.update()
                     row_data.clear()
+                    index += 1
                     continue
             if state < 0:
                 if not line.startswith(lineParsers[(-state) + 1].label):
