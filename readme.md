@@ -89,49 +89,7 @@ CREATE INDEX ON :Product(productId)
 CREATE INDEX ON :User(userId)
 ```    
 
-## 查询
 
-我们选择以 harry potter 系列电影为查询目标。
+## 已知
 
-### 估算结果大小
-
-通过cql自带的正则匹配功能，查询名称形如`.*harry.*potter.*`的产品。
-
-```sql
-MATCH (p: Product)
-WHERE toLower(p.title) =~ ".*harry.*potter.*" 
-RETURN p
-```    
-
-共匹配到109个，csv文件已经导出为hp.csv。数据大小可以接受。
-
-![hp](hp.png)
-
-### 查询
-
-聚合查询累计评论哈利波特系列产品最多的用户
-
-```sql
-MATCH (u: User)-[:REVIEWED]->(p: Product)
-WHERE toLower(p.title) =~ ".*harry.*potter.*" 
-RETURN DISTINCT u.userId, u.profileName, count(*) AS cnt
-ORDER BY cnt DESC
-```    
-
-![user](user.png)
-结果导出为user.csv。
-
-其中，前十名如下
-
-| u.userId       | u.profileName                            | 次數 |
-| -------------- | ---------------------------------------- | ---- |
-| AQZH7YTWQPOBE  | Enjolras                                 | 107  |
-| A3T3USBHXZ5Q7F | D. Petersen                              | 70   |
-| AWG2O9C42XW5G  | David A. Smith "Happy Halloween2012" | 57   |
-| A2582KMXLK2P06 | B. E Jackson                             | 56   |
-| A3JLOIXFM75QNV | Val "LOTRMatrixHPLostFreak"          | 56   |
-| AQ01Q3070LT29  | James McDonald                           | 56   |
-| A3B62CEEBAKM7M | USA                                      | 56   |
-| A2YKADCJME4FSW | Tom Birkenstock                          | 56   |
-| A2OCJNB6B46OKP | Underground Reborn "gnome"           | 56   |
-| AXRS4VY0OPNC7  | Jacqueline L. Smith                      | 56   |
+一个profile一个id只能一次
