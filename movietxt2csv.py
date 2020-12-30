@@ -1,13 +1,12 @@
 import csv
 import datetime
 import re
-from dataclasses import dataclass, field
 from typing import *
 import tqdm
-import time
-import random
+from textblob import TextBlob
+
 raw_file_path = "./movies.txt"
-order_file_path = "./csvs/orders.csv"
+order_file_path = "./csvs/comments.csv"
 review_user_file_path = "./csvs/review_user.csv"
 '''
 
@@ -23,7 +22,6 @@ labels = [
     'review/summary: ',
     'review/text: '
 ]
-
 '''
 product/productId: B00006HAXW
 review/userId: A1RSDE90N6RSZF
@@ -46,6 +44,8 @@ types = {
 
 
 class ColData:
+    label = None
+
     def after_handle(self, s: str):
         return s
 
@@ -127,60 +127,21 @@ lineParsers: List[ColData] = [ProductId(), UserId(), ProfileName(), Helpfulness(
 with open(raw_file_path, 'r', encoding='ISO-8859-1') as movie_txt:
     with open(order_file_path, 'w', encoding='utf-8', newline='') as order_file:
         order_writer = csv.writer(order_file, quoting=csv.QUOTE_ALL)
-        index = 0
-        tasks = tqdm.tqdm(total=7911684)
         state = 0
-        row_data = []
-        for line in movie_txt:
-
-            if state == -7:
-                if line != '\n':
-                    current_line += '\n' + line
-                    continue
-                else:
-                    res = lineParsers[state].after_handle(current_line)
-                    row_data.append(res)
-                    state = 0
-
-                    product_id = row_data[0]
-                    user_id = row_data[1]
-                    user_username = row_data[2]
-                    user_gender = ord(user_id[-1]) % 2
-                    order_time_local = time.localtime(float(row_data[6]))
-                    order_time = time.strftime("%Y-%m-%d", order_time_local)
-                    order_id = index
-                    order_number_choice = random.randint(0, 9)
-                    if order_number_choice == 9:
-                        order_number = 3
-                    elif order_number_choice == 8 or order_number_choice == 7:
-                        order_number = 2
-                    else:
-                        order_number = 1
-                    order_writer.writerow((order_id, order_time, order_number,
-                                          user_id, user_username, user_gender,
-                                          product_id))
-                    tasks.update()
-                    row_data.clear()
-                    index += 1
-                    continue
-            if state < 0:
-                if not line.startswith(lineParsers[(-state) + 1].label):
-                    current_line += '\n' + line
-                    continue
-                else:
-                    res = lineParsers[-state].after_handle(current_line)
-                    row_data.append(res)
-                    state = (-state) + 1
-            if state in (2, 6, 7):
-                current_line = line[len(lineParsers[state].label): -1]
-                state = -state
-                continue
+        col_num = 9
+        row_data = [None] * col_num
+        label_width = [len(lineParser.label) for lineParser in lineParsers]
+        movie_txt_enumerator = enumerate(movie_txt)
+        for line_offset, line in tqdm.tqdm(movie_txt_enumerator, total=7911684):
+            if line == '\n':
+                assert state == 8
+                row_data[6], row_data[7] = TextBlob(row_data[6] + ' ' + row_data[7]).sentiment
+                order_writer.writerow(row_data)
+                row_data = [None] * col_num
+                state = 0
             else:
-                current_line = line[len(lineParsers[state].label): -1]
-                res = lineParsers[state].after_handle(current_line)
-                if state == 3:
-                    row_data += res
+                if line.startswith(lineParsers[state].label):
+                    row_data[state] = line[label_width[state] :-1]
+                    state += 1
                 else:
-                    row_data.append(res)
-                state = state + 1
-                continue
+                    row_data[state] += ' ' + line
