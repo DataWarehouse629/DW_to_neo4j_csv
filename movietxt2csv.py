@@ -132,16 +132,20 @@ with open(raw_file_path, 'r', encoding='ISO-8859-1') as movie_txt:
         row_data = [None] * col_num
         label_width = [len(lineParser.label) for lineParser in lineParsers]
         movie_txt_enumerator = enumerate(movie_txt)
-        for line_offset, line in tqdm.tqdm(movie_txt_enumerator, total=7911684):
-            if line == '\n':
-                assert state == 8
-                row_data[6], row_data[7] = TextBlob(row_data[6] + ' ' + row_data[7]).sentiment
-                order_writer.writerow(row_data)
-                row_data = [None] * col_num
-                state = 0
+        for line_offset, line in tqdm.tqdm(movie_txt_enumerator, total=71205231):
+            if state == 8:
+                if line == '\n':
+                    row_data[7], row_data[8] = TextBlob(row_data[7] + '' + row_data[8]).sentiment
+                    order_writer.writerow(row_data)
+                    row_data = [None] * col_num
+                    state = 0
+                else:
+                    row_data[8] += ' ' + line
             else:
                 if line.startswith(lineParsers[state].label):
-                    row_data[state] = line[label_width[state] :-1]
+                    if state == 0:
+                        row_data[0] = line_offset
+                    row_data[state + 1] = line[label_width[state]:-1]
                     state += 1
                 else:
                     row_data[state] += ' ' + line
